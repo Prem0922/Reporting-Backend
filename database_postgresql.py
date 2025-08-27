@@ -696,5 +696,343 @@ class DatabaseManager:
                 success_count += 1
         return success_count
 
+    # ============================================================================
+    # MISSING CRUD FUNCTIONS FOR COMPLETE API
+    # ============================================================================
+
+    # Requirements CRUD
+    def update_requirement(self, requirement_id: str, data: Dict[str, Any]) -> bool:
+        """Update a requirement"""
+        try:
+            session = self.get_session()
+            requirement = session.query(Requirement).filter(Requirement.requirement_id == requirement_id).first()
+            if requirement:
+                for key, value in data.items():
+                    if hasattr(requirement, key):
+                        setattr(requirement, key, value)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error updating requirement: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    def delete_requirement(self, requirement_id: str) -> bool:
+        """Delete a requirement"""
+        try:
+            session = self.get_session()
+            requirement = session.query(Requirement).filter(Requirement.requirement_id == requirement_id).first()
+            if requirement:
+                session.delete(requirement)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error deleting requirement: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    # Test Cases CRUD
+    def update_test_case(self, test_case_id: str, data: Dict[str, Any]) -> bool:
+        """Update a test case"""
+        try:
+            session = self.get_session()
+            test_case = session.query(TestCase).filter(TestCase.test_case_id == test_case_id).first()
+            if test_case:
+                for key, value in data.items():
+                    if hasattr(test_case, key):
+                        setattr(test_case, key, value)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error updating test case: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    def delete_test_case(self, test_case_id: str) -> bool:
+        """Delete a test case"""
+        try:
+            session = self.get_session()
+            test_case = session.query(TestCase).filter(TestCase.test_case_id == test_case_id).first()
+            if test_case:
+                session.delete(test_case)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error deleting test case: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    # Test Runs CRUD
+    def get_test_run_by_id(self, run_id: str) -> Optional[Dict[str, Any]]:
+        """Get test run by ID"""
+        try:
+            session = self.get_session()
+            test_run = session.query(TestRun).filter(TestRun.run_id == run_id).first()
+            session.close()
+            
+            if test_run:
+                return {
+                    'run_id': test_run.run_id,
+                    'test_run_id': test_run.test_run_id,
+                    'customer_id': test_run.customer_id,
+                    'source_system': test_run.source_system,
+                    'test_case_id': test_run.test_case_id,
+                    'execution_date': test_run.execution_date,
+                    'result': test_run.result,
+                    'observed_time': test_run.observed_time,
+                    'executed_by': test_run.executed_by,
+                    'remarks': test_run.remarks,
+                    'artifacts': test_run.artifacts
+                }
+            return None
+        except Exception as e:
+            print(f"Error getting test run: {e}")
+            session.close()
+            return None
+
+    def update_test_run(self, run_id: str, data: Dict[str, Any]) -> bool:
+        """Update a test run"""
+        try:
+            session = self.get_session()
+            test_run = session.query(TestRun).filter(TestRun.run_id == run_id).first()
+            if test_run:
+                for key, value in data.items():
+                    if hasattr(test_run, key):
+                        setattr(test_run, key, value)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error updating test run: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    def delete_test_run(self, run_id: str) -> bool:
+        """Delete a test run"""
+        try:
+            session = self.get_session()
+            test_run = session.query(TestRun).filter(TestRun.run_id == run_id).first()
+            if test_run:
+                session.delete(test_run)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error deleting test run: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    # Defects CRUD
+    def get_defect_by_id(self, defect_id: str) -> Optional[Dict[str, Any]]:
+        """Get defect by ID"""
+        try:
+            session = self.get_session()
+            defect = session.query(Defect).filter(Defect.defect_id == defect_id).first()
+            session.close()
+            
+            if defect:
+                return {
+                    'defect_id': defect.defect_id,
+                    'title': defect.title,
+                    'severity': defect.severity,
+                    'status': defect.status,
+                    'test_case_id': defect.test_case_id,
+                    'reported_by': defect.reported_by,
+                    'created_at': defect.created_at.isoformat() if defect.created_at else None,
+                    'fixed_at': defect.fixed_at.isoformat() if defect.fixed_at else None
+                }
+            return None
+        except Exception as e:
+            print(f"Error getting defect: {e}")
+            session.close()
+            return None
+
+    def update_defect(self, defect_id: str, data: Dict[str, Any]) -> bool:
+        """Update a defect"""
+        try:
+            session = self.get_session()
+            defect = session.query(Defect).filter(Defect.defect_id == defect_id).first()
+            if defect:
+                for key, value in data.items():
+                    if hasattr(defect, key):
+                        setattr(defect, key, value)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error updating defect: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    def delete_defect(self, defect_id: str) -> bool:
+        """Delete a defect"""
+        try:
+            session = self.get_session()
+            defect = session.query(Defect).filter(Defect.defect_id == defect_id).first()
+            if defect:
+                session.delete(defect)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error deleting defect: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    # Test Type Summary CRUD
+    def get_test_type_summary_by_id(self, summary_id: int) -> Optional[Dict[str, Any]]:
+        """Get test type summary by ID"""
+        try:
+            session = self.get_session()
+            summary = session.query(TestTypeSummary).filter(TestTypeSummary.id == summary_id).first()
+            session.close()
+            
+            if summary:
+                return {
+                    'id': summary.id,
+                    'test_type': summary.test_type,
+                    'metrics': summary.metrics,
+                    'expected': summary.expected,
+                    'actual': summary.actual,
+                    'status': summary.status,
+                    'test_date': summary.test_date
+                }
+            return None
+        except Exception as e:
+            print(f"Error getting test type summary: {e}")
+            session.close()
+            return None
+
+    def update_test_type_summary(self, summary_id: int, data: Dict[str, Any]) -> bool:
+        """Update a test type summary"""
+        try:
+            session = self.get_session()
+            summary = session.query(TestTypeSummary).filter(TestTypeSummary.id == summary_id).first()
+            if summary:
+                for key, value in data.items():
+                    if hasattr(summary, key):
+                        setattr(summary, key, value)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error updating test type summary: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    def delete_test_type_summary(self, summary_id: int) -> bool:
+        """Delete a test type summary"""
+        try:
+            session = self.get_session()
+            summary = session.query(TestTypeSummary).filter(TestTypeSummary.id == summary_id).first()
+            if summary:
+                session.delete(summary)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error deleting test type summary: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    # Transit Metrics Daily CRUD
+    def get_transit_metrics_daily_by_id(self, metric_id: int) -> Optional[Dict[str, Any]]:
+        """Get transit metrics daily by ID"""
+        try:
+            session = self.get_session()
+            metric = session.query(TransitMetric).filter(TransitMetric.id == metric_id).first()
+            session.close()
+            
+            if metric:
+                return {
+                    'id': metric.id,
+                    'date': metric.date,
+                    'fvm_transactions': metric.fvm_transactions,
+                    'gate_taps': metric.gate_taps,
+                    'bus_taps': metric.bus_taps,
+                    'success_rate_gate': metric.success_rate_gate,
+                    'success_rate_bus': metric.success_rate_bus,
+                    'avg_response_time': metric.avg_response_time,
+                    'defect_count': metric.defect_count,
+                    'notes': metric.notes
+                }
+            return None
+        except Exception as e:
+            print(f"Error getting transit metrics daily: {e}")
+            session.close()
+            return None
+
+    def update_transit_metrics_daily(self, metric_id: int, data: Dict[str, Any]) -> bool:
+        """Update a transit metrics daily"""
+        try:
+            session = self.get_session()
+            metric = session.query(TransitMetric).filter(TransitMetric.id == metric_id).first()
+            if metric:
+                for key, value in data.items():
+                    if hasattr(metric, key):
+                        setattr(metric, key, value)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error updating transit metrics daily: {e}")
+            session.rollback()
+            session.close()
+            return False
+
+    def delete_transit_metrics_daily(self, metric_id: int) -> bool:
+        """Delete a transit metrics daily"""
+        try:
+            session = self.get_session()
+            metric = session.query(TransitMetric).filter(TransitMetric.id == metric_id).first()
+            if metric:
+                session.delete(metric)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            print(f"Error deleting transit metrics daily: {e}")
+            session.rollback()
+            session.close()
+            return False
+
 # Global database instance
 db = DatabaseManager()
