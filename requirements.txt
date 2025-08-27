@@ -1,0 +1,36 @@
+# Core Flask dependencies
+flask==2.3.3
+flask-cors==4.0.0
+flask-swagger-ui==4.11.1
+
+# Database dependencies
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.41
+alembic==1.13.1
+
+# Authentication and security
+bcrypt==4.0.1
+pyjwt==2.8.0
+
+# HTTP requests for URL uploads
+requests==2.31.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Email functionality
+# These are built-in Python modules, no need to install:
+# smtplib
+# email.mime.text
+# email.mime.multipart
+
+# Twilio for SMS (optional)
+twilio==8.10.0
+
+# Data generation and utilities
+faker==20.1.0
+
+# Development dependencies
+# These are optional for development:
+# black==23.3.0  # Code formatting
+# pylint==2.17.4  # Code linting 
