@@ -276,9 +276,15 @@ def signup():
         
         return jsonify({
             'message': 'User created successfully',
-            'access_token': access_token,
-            'token_type': 'bearer',
-            'user_name': f"{data['firstName']} {data['lastName']}"
+            'token': access_token,
+            'user': {
+                'username': data['username'],
+                'email': data['email'],
+                'first_name': data['firstName'],
+                'last_name': data['lastName'],
+                'country_code': None,
+                'phone': None
+            }
         }), 201
         
     except Exception as e:
@@ -314,9 +320,15 @@ def login():
         
         return jsonify({
             'message': 'Login successful',
-            'access_token': access_token,
-            'token_type': 'bearer',
-            'user_name': f"{user['first_name']} {user['last_name']}"
+            'token': access_token,
+            'user': {
+                'username': user['username'],
+                'email': user['email'],
+                'first_name': user['first_name'],
+                'last_name': user['last_name'],
+                'country_code': None,
+                'phone': None
+            }
         }), 200
         
     except Exception as e:
@@ -562,6 +574,102 @@ def check_schema():
             "status": "error",
             "message": f"Schema check failed: {str(e)}"
         }), 500
+
+# Dashboard endpoints
+@app.route('/api/me', methods=['GET', 'OPTIONS'])
+def get_current_user():
+    """Get current user information"""
+    if request.method == 'OPTIONS':
+        return '', 200
+    
+    try:
+        # Get token from Authorization header
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'No valid token provided'}), 401
+        
+        token = auth_header.split(' ')[1]
+        
+        # Decode token
+        data = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_email = data['sub']
+        
+        # Get user from database
+        user = get_db().get_user_by_email(user_email)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        return jsonify({
+            'user': {
+                'username': user['username'],
+                'email': user['email'],
+                'first_name': user['first_name'],
+                'last_name': user['last_name'],
+                'country_code': None,
+                'phone': None
+            }
+        }), 200
+        
+    except jwt.ExpiredSignatureError:
+        return jsonify({'error': 'Token has expired'}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({'error': 'Invalid token'}), 401
+    except Exception as e:
+        return jsonify({'error': 'Authentication failed'}), 500
+
+@app.route('/api/requirements', methods=['GET'])
+def get_requirements():
+    """Get all requirements"""
+    try:
+        requirements = get_db().get_all_requirements()
+        return jsonify(requirements), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/testcases', methods=['GET'])
+def get_test_cases():
+    """Get all test cases"""
+    try:
+        test_cases = get_db().get_all_test_cases()
+        return jsonify(test_cases), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/testruns', methods=['GET'])
+def get_test_runs():
+    """Get all test runs"""
+    try:
+        test_runs = get_db().get_all_test_runs()
+        return jsonify(test_runs), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/defects', methods=['GET'])
+def get_defects():
+    """Get all defects"""
+    try:
+        defects = get_db().get_all_defects()
+        return jsonify(defects), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/testtypesummary', methods=['GET'])
+def get_test_type_summary():
+    """Get all test type summaries"""
+    try:
+        summaries = get_db().get_all_test_type_summary()
+        return jsonify(summaries), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/transitmetricsdaily', methods=['GET'])
+def get_transit_metrics():
+    """Get all transit metrics"""
+    try:
+        metrics = get_db().get_all_transit_metrics()
+        return jsonify(metrics), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     try:
