@@ -96,6 +96,54 @@ def startup_test():
         "timestamp": datetime.datetime.now().isoformat()
     }), 200
 
+# Check database schema endpoint
+@app.route('/api/check-schema', methods=['GET'])
+def check_schema():
+    """Check if database tables exist"""
+    try:
+        from database_postgresql import get_engine, Base
+        engine = get_engine()
+        
+        # Check if users table exists
+        with engine.connect() as connection:
+            result = connection.execute(text("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'users'
+            """))
+            tables = [row[0] for row in result]
+            
+            if 'users' in tables:
+                # Check table structure
+                result = connection.execute(text("""
+                    SELECT column_name, data_type, is_nullable
+                    FROM information_schema.columns 
+                    WHERE table_name = 'users'
+                    ORDER BY ordinal_position
+                """))
+                columns = [dict(row._mapping) for row in result]
+                
+                return jsonify({
+                    "status": "success",
+                    "users_table_exists": True,
+                    "columns": columns
+                }), 200
+            else:
+                return jsonify({
+                    "status": "error",
+                    "users_table_exists": False,
+                    "message": "Users table does not exist"
+                }), 500
+                
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "error",
+            "message": f"Schema check failed: {str(e)}"
+        }), 500
+
 # Test database endpoint
 @app.route('/api/test-db', methods=['GET'])
 def test_database():
