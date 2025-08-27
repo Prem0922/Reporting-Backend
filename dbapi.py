@@ -585,9 +585,12 @@ def get_requirements():
     """Get all requirements"""
     try:
         requirements = get_db().get_all_requirements()
+        if requirements is None:
+            requirements = []
         return jsonify(requirements), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error getting requirements: {e}")
+        return jsonify([]), 200
 
 @app.route('/api/requirements', methods=['POST'])
 def create_requirement():
@@ -645,9 +648,12 @@ def get_testcases():
     """Get all test cases"""
     try:
         testcases = get_db().get_all_test_cases()
+        if testcases is None:
+            testcases = []
         return jsonify(testcases), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error getting test cases: {e}")
+        return jsonify([]), 200
 
 @app.route('/api/testcases', methods=['POST'])
 def create_testcase():
@@ -705,9 +711,12 @@ def get_testruns():
     """Get all test runs"""
     try:
         testruns = get_db().get_all_test_runs()
+        if testruns is None:
+            testruns = []
         return jsonify(testruns), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error getting test runs: {e}")
+        return jsonify([]), 200
 
 @app.route('/api/testruns', methods=['POST'])
 def create_testrun():
@@ -765,9 +774,12 @@ def get_defects():
     """Get all defects"""
     try:
         defects = get_db().get_all_defects()
+        if defects is None:
+            defects = []
         return jsonify(defects), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error getting defects: {e}")
+        return jsonify([]), 200
 
 @app.route('/api/defects', methods=['POST'])
 def create_defect():
@@ -824,10 +836,13 @@ def delete_defect(defect_id):
 def get_testtypesummary():
     """Get all test type summaries"""
     try:
-        summaries = get_db().get_all_test_type_summaries()
+        summaries = get_db().get_all_test_type_summary()
+        if summaries is None:
+            summaries = []
         return jsonify(summaries), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error getting test type summaries: {e}")
+        return jsonify([]), 200
 
 @app.route('/api/testtypesummary', methods=['POST'])
 def create_testtypesummary():
@@ -884,10 +899,13 @@ def delete_testtypesummary(summary_id):
 def get_transitmetricsdaily():
     """Get all transit metrics daily"""
     try:
-        metrics = get_db().get_all_transit_metrics_daily()
+        metrics = get_db().get_all_transit_metrics()
+        if metrics is None:
+            metrics = []
         return jsonify(metrics), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error getting transit metrics: {e}")
+        return jsonify([]), 200
 
 @app.route('/api/transitmetricsdaily', methods=['POST'])
 def create_transitmetricsdaily():
