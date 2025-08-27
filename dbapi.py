@@ -113,8 +113,7 @@ def test_database():
             'password': 'test_password',
             'email': 'test@example.com',
             'first_name': 'Test',
-            'last_name': 'User',
-            'created_at': datetime.datetime.now().isoformat()
+            'last_name': 'User'
         }
         
         success = create_user(test_user)
@@ -1765,8 +1764,7 @@ def signup():
         'first_name': first_name,
         'last_name': last_name,
         'phone': phone,
-        'country_code': country_code,
-        'created_at': datetime.datetime.now().isoformat()
+        'country_code': country_code
     }
     
     try:
