@@ -2,9 +2,7 @@ services:
   - type: web
     name: reporting-api
     env: python
-    buildCommand: |
-      python --version
-      pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt
     startCommand: python dbapi.py
     envVars:
       - key: DATABASE_URL
