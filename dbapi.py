@@ -73,10 +73,50 @@ def health_check():
             "timestamp": datetime.datetime.now().isoformat()
         }), 200
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({
             "status": "unhealthy",
             "message": f"Backend error: {str(e)}",
             "timestamp": datetime.datetime.now().isoformat()
+        }), 500
+
+# Test database endpoint
+@app.route('/api/test-db', methods=['GET'])
+def test_database():
+    """Test database connection and user creation"""
+    try:
+        # Test basic connection
+        from database_postgresql import engine
+        with engine.connect() as connection:
+            result = connection.execute(text("SELECT 1"))
+            print("✅ Database connection successful")
+        
+        # Test user creation
+        test_user = {
+            'username': 'test_user_' + str(int(datetime.datetime.now().timestamp())),
+            'password': 'test_password',
+            'email': 'test@example.com',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'created_at': datetime.datetime.now().isoformat()
+        }
+        
+        success = create_user(test_user)
+        
+        return jsonify({
+            "status": "success",
+            "database_connection": "working",
+            "user_creation": "working" if success else "failed",
+            "message": "Database test completed"
+        }), 200
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "error",
+            "message": f"Database test failed: {str(e)}"
         }), 500
 
 # Swagger JSON endpoint
@@ -1721,6 +1761,8 @@ def signup():
             return jsonify({'error': 'Failed to create user'}), 500
     except Exception as e:
         print(f"Signup error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': f'Signup failed: {str(e)}'}), 500
 
 @app.route('/api/login', methods=['POST'])
