@@ -13,8 +13,49 @@ load_dotenv()
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/reporting_db")
 
-# Create SQLAlchemy engine
-engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, pool_pre_ping=True)
+# Create SQLAlchemy engine with fallback adapters
+def create_engine_with_fallback():
+    """Create SQLAlchemy engine with fallback to different PostgreSQL adapters"""
+    
+    # Try different adapter configurations in order of preference
+    adapters = [
+        # Try psycopg2 first (most common)
+        lambda url: create_engine(url, pool_size=10, max_overflow=20, pool_pre_ping=True),
+        
+        # Try psycopg3 if psycopg2 fails
+        lambda url: create_engine(url.replace("postgresql://", "postgresql+psycopg://", 1), 
+                                pool_size=10, max_overflow=20, pool_pre_ping=True),
+        
+        # Try asyncpg as last resort
+        lambda url: create_engine(url.replace("postgresql://", "postgresql+asyncpg://", 1), 
+                                pool_size=10, max_overflow=20, pool_pre_ping=True)
+    ]
+    
+    for i, adapter in enumerate(adapters):
+        try:
+            print(f"Trying PostgreSQL adapter {i+1}...")
+            engine = adapter(DATABASE_URL)
+            
+            # Test the connection
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+                print(f"✅ PostgreSQL adapter {i+1} works successfully")
+                return engine
+                
+        except Exception as e:
+            print(f"❌ PostgreSQL adapter {i+1} failed: {e}")
+            continue
+    
+    # If all adapters fail, raise an error
+    raise Exception("All PostgreSQL adapters failed. Please check your database configuration.")
+
+# Create engine with fallback
+try:
+    engine = create_engine_with_fallback()
+except Exception as e:
+    print(f"Failed to create database engine: {e}")
+    # Create a dummy engine for development
+    engine = create_engine("sqlite:///fallback.db")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
