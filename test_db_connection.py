@@ -26,8 +26,8 @@ def test_imports():
         print("✅ Flask-Swagger-UI imported successfully")
         
         # Test database imports
-        import psycopg2
-        print("✅ psycopg2 imported successfully")
+        import psycopg
+        print("✅ psycopg3 imported successfully")
         
         import sqlalchemy
         print("✅ SQLAlchemy imported successfully")
