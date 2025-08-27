@@ -63,8 +63,8 @@ def health_check():
     """Health check endpoint"""
     try:
         # Test database connection
-        from database_postgresql import engine
-        with engine.connect() as connection:
+        from database_postgresql import get_engine
+        with get_engine().connect() as connection:
             connection.execute(text("SELECT 1"))
         
         return jsonify({
@@ -87,8 +87,8 @@ def test_database():
     """Test database connection and user creation"""
     try:
         # Test basic connection
-        from database_postgresql import engine
-        with engine.connect() as connection:
+        from database_postgresql import get_engine
+        with get_engine().connect() as connection:
             result = connection.execute(text("SELECT 1"))
             print("✅ Database connection successful")
         
@@ -2820,8 +2820,8 @@ if __name__ == '__main__':
     print("🚀 Starting Reporting Backend...")
     
     # Create database tables
-    from database_postgresql import Base, engine
-    Base.metadata.create_all(bind=engine)
+    from database_postgresql import Base, get_engine
+    Base.metadata.create_all(bind=get_engine())
     print("✅ Database tables created successfully")
     
     port = int(os.environ.get('PORT', 5000))
