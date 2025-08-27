@@ -4,10 +4,8 @@ flask-cors==4.0.0
 flask-swagger-ui==4.11.1
 
 # Database dependencies - Python 3.11 compatible
-# Try multiple PostgreSQL adapters for compatibility
+# Use psycopg2-binary for stability
 psycopg2-binary==2.9.6
-psycopg[binary]==3.1.18
-asyncpg==0.29.0
 sqlalchemy==2.0.41
 alembic==1.13.1
 
