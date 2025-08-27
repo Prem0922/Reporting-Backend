@@ -322,28 +322,20 @@ def generate_test_run_data(test_case_ids):
         random_test_case_id = random.choice(test_case_ids)
         # Use UUID instead of hardcoded rid-xxx format to avoid duplicates
         run_id = str(uuid.uuid4())
-        test_run_id = f"TR-{random.randint(1000, 9999)}"
-        customer_id = random.randint(1, 100)
-        source_system = random.choice(["FVM", "Gate Reader", "Bus Reader", "Backend"])
         execution_date = datetime.now().strftime('%d-%m-%Y %H:%M')
         result = random.choice(TEST_RESULTS)
         observed_time = random.randint(100, 9999)
         executed_by = f"Robot_Unit_0{random.randint(0, 9)}"
         remarks = random.choice(REMARKS)
-        artifacts = f"logs/test_run_{run_id}.log"
 
         test_runs.append({
             "run_id": run_id,
-            "test_run_id": test_run_id,
-            "customer_id": customer_id,
-            "source_system": source_system,
             "test_case_id": random_test_case_id,
             "execution_date": execution_date,
             "result": result,
             "observed_time": observed_time,
             "executed_by": executed_by,
-            "remarks": remarks,
-            "artifacts": artifacts
+            "remarks": remarks
         })
     return test_runs
 

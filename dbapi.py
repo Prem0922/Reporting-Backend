@@ -575,392 +575,7 @@ def check_schema():
             "message": f"Schema check failed: {str(e)}"
         }), 500
 
-# ============================================================================
-# COMPLETE CRUD ENDPOINTS FOR ALL TABLES (CRM-STYLE)
-# ============================================================================
-
-# Requirements CRUD
-@app.route('/api/requirements', methods=['GET'])
-def get_requirements():
-    """Get all requirements"""
-    try:
-        requirements = get_db().get_all_requirements()
-        if requirements is None:
-            requirements = []
-        return jsonify(requirements), 200
-    except Exception as e:
-        print(f"Error getting requirements: {e}")
-        return jsonify([]), 200
-
-@app.route('/api/requirements', methods=['POST'])
-def create_requirement():
-    """Create a new requirement"""
-    try:
-        data = request.get_json()
-        success = get_db().create_requirement(data)
-        if success:
-            return jsonify({"message": "Requirement created successfully"}), 201
-        else:
-            return jsonify({"error": "Failed to create requirement"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/requirements/<requirement_id>', methods=['GET'])
-def get_requirement(requirement_id):
-    """Get a specific requirement"""
-    try:
-        requirement = get_db().get_requirement_by_id(requirement_id)
-        if requirement:
-            return jsonify(requirement), 200
-        else:
-            return jsonify({"error": "Requirement not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/requirements/<requirement_id>', methods=['PUT'])
-def update_requirement(requirement_id):
-    """Update a requirement"""
-    try:
-        data = request.get_json()
-        success = get_db().update_requirement(requirement_id, data)
-        if success:
-            return jsonify({"message": "Requirement updated successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to update requirement"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/requirements/<requirement_id>', methods=['DELETE'])
-def delete_requirement(requirement_id):
-    """Delete a requirement"""
-    try:
-        success = get_db().delete_requirement(requirement_id)
-        if success:
-            return jsonify({"message": "Requirement deleted successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to delete requirement"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Test Cases CRUD
-@app.route('/api/testcases', methods=['GET'])
-def get_testcases():
-    """Get all test cases"""
-    try:
-        testcases = get_db().get_all_test_cases()
-        if testcases is None:
-            testcases = []
-        return jsonify(testcases), 200
-    except Exception as e:
-        print(f"Error getting test cases: {e}")
-        return jsonify([]), 200
-
-@app.route('/api/testcases', methods=['POST'])
-def create_testcase():
-    """Create a new test case"""
-    try:
-        data = request.get_json()
-        success = get_db().create_test_case(data)
-        if success:
-            return jsonify({"message": "Test case created successfully"}), 201
-        else:
-            return jsonify({"error": "Failed to create test case"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/testcases/<testcase_id>', methods=['GET'])
-def get_testcase(testcase_id):
-    """Get a specific test case"""
-    try:
-        testcase = get_db().get_test_case_by_id(testcase_id)
-        if testcase:
-            return jsonify(testcase), 200
-        else:
-            return jsonify({"error": "Test case not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/testcases/<testcase_id>', methods=['PUT'])
-def update_testcase(testcase_id):
-    """Update a test case"""
-    try:
-        data = request.get_json()
-        success = get_db().update_test_case(testcase_id, data)
-        if success:
-            return jsonify({"message": "Test case updated successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to update test case"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/testcases/<testcase_id>', methods=['DELETE'])
-def delete_testcase(testcase_id):
-    """Delete a test case"""
-    try:
-        success = get_db().delete_test_case(testcase_id)
-        if success:
-            return jsonify({"message": "Test case deleted successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to delete test case"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Test Runs CRUD
-@app.route('/api/testruns', methods=['GET'])
-def get_testruns():
-    """Get all test runs"""
-    try:
-        testruns = get_db().get_all_test_runs()
-        if testruns is None:
-            testruns = []
-        return jsonify(testruns), 200
-    except Exception as e:
-        print(f"Error getting test runs: {e}")
-        return jsonify([]), 200
-
-@app.route('/api/testruns', methods=['POST'])
-def create_testrun():
-    """Create a new test run"""
-    try:
-        data = request.get_json()
-        success = get_db().create_test_run(data)
-        if success:
-            return jsonify({"message": "Test run created successfully"}), 201
-        else:
-            return jsonify({"error": "Failed to create test run"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/testruns/<run_id>', methods=['GET'])
-def get_testrun(run_id):
-    """Get a specific test run"""
-    try:
-        testrun = get_db().get_test_run_by_id(run_id)
-        if testrun:
-            return jsonify(testrun), 200
-        else:
-            return jsonify({"error": "Test run not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/testruns/<run_id>', methods=['PUT'])
-def update_testrun(run_id):
-    """Update a test run"""
-    try:
-        data = request.get_json()
-        success = get_db().update_test_run(run_id, data)
-        if success:
-            return jsonify({"message": "Test run updated successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to update test run"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/testruns/<run_id>', methods=['DELETE'])
-def delete_testrun(run_id):
-    """Delete a test run"""
-    try:
-        success = get_db().delete_test_run(run_id)
-        if success:
-            return jsonify({"message": "Test run deleted successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to delete test run"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Defects CRUD
-@app.route('/api/defects', methods=['GET'])
-def get_defects():
-    """Get all defects"""
-    try:
-        defects = get_db().get_all_defects()
-        if defects is None:
-            defects = []
-        return jsonify(defects), 200
-    except Exception as e:
-        print(f"Error getting defects: {e}")
-        return jsonify([]), 200
-
-@app.route('/api/defects', methods=['POST'])
-def create_defect():
-    """Create a new defect"""
-    try:
-        data = request.get_json()
-        success = get_db().create_defect(data)
-        if success:
-            return jsonify({"message": "Defect created successfully"}), 201
-        else:
-            return jsonify({"error": "Failed to create defect"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/defects/<defect_id>', methods=['GET'])
-def get_defect(defect_id):
-    """Get a specific defect"""
-    try:
-        defect = get_db().get_defect_by_id(defect_id)
-        if defect:
-            return jsonify(defect), 200
-        else:
-            return jsonify({"error": "Defect not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/defects/<defect_id>', methods=['PUT'])
-def update_defect(defect_id):
-    """Update a defect"""
-    try:
-        data = request.get_json()
-        success = get_db().update_defect(defect_id, data)
-        if success:
-            return jsonify({"message": "Defect updated successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to update defect"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/defects/<defect_id>', methods=['DELETE'])
-def delete_defect(defect_id):
-    """Delete a defect"""
-    try:
-        success = get_db().delete_defect(defect_id)
-        if success:
-            return jsonify({"message": "Defect deleted successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to delete defect"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Test Type Summary CRUD
-@app.route('/api/testtypesummary', methods=['GET'])
-def get_testtypesummary():
-    """Get all test type summaries"""
-    try:
-        summaries = get_db().get_all_test_type_summary()
-        if summaries is None:
-            summaries = []
-        return jsonify(summaries), 200
-    except Exception as e:
-        print(f"Error getting test type summaries: {e}")
-        return jsonify([]), 200
-
-@app.route('/api/testtypesummary', methods=['POST'])
-def create_testtypesummary():
-    """Create a new test type summary"""
-    try:
-        data = request.get_json()
-        success = get_db().create_test_type_summary(data)
-        if success:
-            return jsonify({"message": "Test type summary created successfully"}), 201
-        else:
-            return jsonify({"error": "Failed to create test type summary"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/testtypesummary/<summary_id>', methods=['GET'])
-def get_testtypesummary_by_id(summary_id):
-    """Get a specific test type summary"""
-    try:
-        summary = get_db().get_test_type_summary_by_id(summary_id)
-        if summary:
-            return jsonify(summary), 200
-        else:
-            return jsonify({"error": "Test type summary not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/testtypesummary/<summary_id>', methods=['PUT'])
-def update_testtypesummary(summary_id):
-    """Update a test type summary"""
-    try:
-        data = request.get_json()
-        success = get_db().update_test_type_summary(summary_id, data)
-        if success:
-            return jsonify({"message": "Test type summary updated successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to update test type summary"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/testtypesummary/<summary_id>', methods=['DELETE'])
-def delete_testtypesummary(summary_id):
-    """Delete a test type summary"""
-    try:
-        success = get_db().delete_test_type_summary(summary_id)
-        if success:
-            return jsonify({"message": "Test type summary deleted successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to delete test type summary"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Transit Metrics Daily CRUD
-@app.route('/api/transitmetricsdaily', methods=['GET'])
-def get_transitmetricsdaily():
-    """Get all transit metrics daily"""
-    try:
-        metrics = get_db().get_all_transit_metrics()
-        if metrics is None:
-            metrics = []
-        return jsonify(metrics), 200
-    except Exception as e:
-        print(f"Error getting transit metrics: {e}")
-        return jsonify([]), 200
-
-@app.route('/api/transitmetricsdaily', methods=['POST'])
-def create_transitmetricsdaily():
-    """Create a new transit metrics daily"""
-    try:
-        data = request.get_json()
-        success = get_db().create_transit_metrics_daily(data)
-        if success:
-            return jsonify({"message": "Transit metrics daily created successfully"}), 201
-        else:
-            return jsonify({"error": "Failed to create transit metrics daily"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/transitmetricsdaily/<metric_id>', methods=['GET'])
-def get_transitmetricsdaily_by_id(metric_id):
-    """Get a specific transit metrics daily"""
-    try:
-        metric = get_db().get_transit_metrics_daily_by_id(metric_id)
-        if metric:
-            return jsonify(metric), 200
-        else:
-            return jsonify({"error": "Transit metrics daily not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/transitmetricsdaily/<metric_id>', methods=['PUT'])
-def update_transitmetricsdaily(metric_id):
-    """Update a transit metrics daily"""
-    try:
-        data = request.get_json()
-        success = get_db().update_transit_metrics_daily(metric_id, data)
-        if success:
-            return jsonify({"message": "Transit metrics daily updated successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to update transit metrics daily"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/transitmetricsdaily/<metric_id>', methods=['DELETE'])
-def delete_transitmetricsdaily(metric_id):
-    """Delete a transit metrics daily"""
-    try:
-        success = get_db().delete_transit_metrics_daily(metric_id)
-        if success:
-            return jsonify({"message": "Transit metrics daily deleted successfully"}), 200
-        else:
-            return jsonify({"error": "Failed to delete transit metrics daily"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ============================================================================
-# DASHBOARD ENDPOINTS (EXISTING)
-# ============================================================================
-
+# Dashboard endpoints
 @app.route('/api/me', methods=['GET', 'OPTIONS'])
 def get_current_user():
     """Get current user information"""
@@ -1002,9 +617,59 @@ def get_current_user():
     except Exception as e:
         return jsonify({'error': 'Authentication failed'}), 500
 
-# Dashboard endpoints are now handled by the CRUD endpoints above
-# GET /api/requirements, /api/testcases, /api/testruns, /api/defects, 
-# /api/testtypesummary, /api/transitmetricsdaily are all available
+@app.route('/api/requirements', methods=['GET'])
+def get_requirements():
+    """Get all requirements"""
+    try:
+        requirements = get_db().get_all_requirements()
+        return jsonify(requirements), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/testcases', methods=['GET'])
+def get_test_cases():
+    """Get all test cases"""
+    try:
+        test_cases = get_db().get_all_test_cases()
+        return jsonify(test_cases), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/testruns', methods=['GET'])
+def get_test_runs():
+    """Get all test runs"""
+    try:
+        test_runs = get_db().get_all_test_runs()
+        return jsonify(test_runs), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/defects', methods=['GET'])
+def get_defects():
+    """Get all defects"""
+    try:
+        defects = get_db().get_all_defects()
+        return jsonify(defects), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/testtypesummary', methods=['GET'])
+def get_test_type_summary():
+    """Get all test type summaries"""
+    try:
+        summaries = get_db().get_all_test_type_summary()
+        return jsonify(summaries), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/transitmetricsdaily', methods=['GET'])
+def get_transit_metrics():
+    """Get all transit metrics"""
+    try:
+        metrics = get_db().get_all_transit_metrics()
+        return jsonify(metrics), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     try:
