@@ -13,11 +13,7 @@ load_dotenv()
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/reporting_db")
 
-# For psycopg3, we need to use postgresql+psycopg:// instead of postgresql://
-if DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
-
-# Create SQLAlchemy engine
+# Create SQLAlchemy engine (using standard postgresql:// for psycopg2-binary)
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -33,7 +29,7 @@ class User(Base):
     last_name = Column(String)
     phone = Column(String)
     country_code = Column(String)
-    created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
 class Requirement(Base):
     __tablename__ = "requirements"
@@ -45,7 +41,7 @@ class Requirement(Base):
     priority = Column(String)
     status = Column(String)
     jira_id = Column(String)
-    created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
 class TestCase(Base):
     __tablename__ = "test_cases_structured"
@@ -61,7 +57,7 @@ class TestCase(Base):
     pre_condition = Column(Text)
     test_steps = Column(Text)
     expected_result = Column(Text)
-    uploaded_at = Column(DateTime, default=datetime.datetime.utcnow)
+    uploaded_at = Column(DateTime, default=datetime.datetime.now)
 
 class TestRun(Base):
     __tablename__ = "test_runs"
