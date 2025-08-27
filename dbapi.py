@@ -2568,26 +2568,7 @@ def process_transit_metrics_event(event, customer_id, source_system):
 # API HEALTH CHECK
 # ============================================================================
 
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    """Health check endpoint"""
-    try:
-        # Test database connection
-        session = db.get_session()
-        session.execute(text("SELECT 1"))
-        session.close()
-        db_status = "healthy"
-    except Exception as e:
-        print(f"Database health check failed: {e}")
-        db_status = "unhealthy"
-    
-    return jsonify({
-        "status": "healthy",
-        "timestamp": datetime.datetime.now().isoformat(),
-        "version": "1.0.0",
-        "database": "PostgreSQL",
-        "database_status": db_status
-    }), 200
+
 
 @app.route('/api/v1/health', methods=['GET'])
 def health_check_v1():
