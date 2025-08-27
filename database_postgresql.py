@@ -22,20 +22,10 @@ def get_engine():
     """Get database engine with lazy initialization"""
     global engine
     if engine is None:
-        # Create SQLAlchemy engine with fallback
+        # Create SQLAlchemy engine using standard PostgreSQL driver
         database_url = DATABASE_URL
-        try:
-            # Try psycopg3 first
-            if database_url.startswith("postgresql://"):
-                database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
-            engine = create_engine(database_url, pool_size=10, max_overflow=20, pool_pre_ping=True)
-            print("✅ Using psycopg3 database driver")
-        except Exception as e:
-            print(f"⚠️  psycopg3 failed, trying default: {e}")
-            # Fallback to default PostgreSQL driver
-            database_url = DATABASE_URL
-            engine = create_engine(database_url, pool_size=10, max_overflow=20, pool_pre_ping=True)
-            print("✅ Using default PostgreSQL driver")
+        engine = create_engine(database_url, pool_size=10, max_overflow=20, pool_pre_ping=True)
+        print("✅ Using standard PostgreSQL driver")
     return engine
 
 def get_session_local():
