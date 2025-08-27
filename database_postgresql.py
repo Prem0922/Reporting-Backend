@@ -157,18 +157,27 @@ class DatabaseManager:
     def create_user(self, user_data: Dict[str, Any]) -> bool:
         """Create a new user"""
         try:
+            print(f"Creating user with data: {user_data}")
             session = self.get_session()
+            print("Session created successfully")
             user = User(**user_data)
+            print("User object created")
             session.add(user)
+            print("User added to session")
             session.commit()
+            print("Session committed successfully")
             session.close()
+            print("Session closed")
             return True
-        except SQLAlchemyError:
+        except SQLAlchemyError as e:
+            print(f"SQLAlchemy error creating user: {e}")
             session.rollback()
             session.close()
             return False
         except Exception as e:
             print(f"Error creating user: {e}")
+            import traceback
+            traceback.print_exc()
             session.rollback()
             session.close()
             return False
