@@ -98,6 +98,45 @@ STATUSES = ["Open", "Closed", "In-Progress", "Resolved"]
 TEST_TYPE_VALUES = ["Stress Test-Bus Readers", "Scalability Test-Backend", "Memory Usage Test - Controller", "Load Test - Gate Readers", "Battery Drain Test - Robot", "Response Time Validation - All Devices", "Performance Test - FVM", "Latency Test - NFC Tap"]
 METRICS_VALUES = ["Average Response Time", "CPU Utilization", "Recovery Time From Crash", "Transaction Completion Time", "Concurrent Sessions Handled", "Max Transactions per hour", "Battery Usage per hour", "System Up time", "Memory Usage"]
 EXPECTED_FORMATS = ["<=xxxms", "<=xxxms", "<xxxms", ">xxxms", "xx.xx%", ">=xxxx", "<=xx%", ">=xx.xx%", "<=x.xGB"]
+
+def main():
+    """Main function to generate all test data"""
+    print("🚀 Starting data generation...")
+    
+    try:
+        # Generate requirements
+        print("📋 Generating requirements...")
+        generate_requirements()
+        
+        # Generate test cases
+        print("🧪 Generating test cases...")
+        generate_test_cases()
+        
+        # Generate test runs
+        print("🏃 Generating test runs...")
+        generate_test_runs()
+        
+        # Generate defects
+        print("🐛 Generating defects...")
+        generate_defects()
+        
+        # Generate test type summaries
+        print("📊 Generating test type summaries...")
+        generate_test_type_summaries()
+        
+        # Generate transit metrics
+        print("📈 Generating transit metrics...")
+        generate_transit_metrics()
+        
+        print("✅ All data generated successfully!")
+        
+    except Exception as e:
+        print(f"❌ Error generating data: {e}")
+        import traceback
+        traceback.print_exc()
+
+if __name__ == "__main__":
+    main()
 ACTUAL_FORMATS_MS = ["xxxms", "xxms"]
 ACTUAL_FORMATS_PERCENT = ["xx.xx%"]
 ACTUAL_FORMATS_SECONDS = ["x.xs"]
