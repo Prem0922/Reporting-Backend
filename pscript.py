@@ -104,29 +104,58 @@ def main():
     print("🚀 Starting data generation...")
     
     try:
-        # Generate requirements
+        # Fetch existing requirement IDs before generating structured test cases
+        existing_requirement_ids = fetch_existing_requirement_ids()
+
+        # Generate and send requirements
         print("📋 Generating requirements...")
-        generate_requirements()
-        
-        # Generate test cases
+        num_requirements_to_generate = 10
+        for _ in range(num_requirements_to_generate):
+            requirement_data = generate_dummy_requirement_data()
+            send_requirement_data_to_db(requirement_data)
+
+        # Generate and send test cases
         print("🧪 Generating test cases...")
-        generate_test_cases()
+        structured_test_cases_data = []
         
+        # Generate various test cases
+        fvm_titles = ["Verify: User should be able to purchase a SmartCard using FVM."]
+        for _ in range(3):
+            structured_test_cases_data.append(generate_structured_test_case("FVM", "FVM", fvm_titles, existing_requirement_ids))
+        
+        gate_titles = ["Verify: Gate Reader should be able to read DesFire, MiFare, Credit card and Barcode."]
+        for _ in range(3):
+            structured_test_cases_data.append(generate_structured_test_case("GATE READER", "GATE", gate_titles, existing_requirement_ids))
+        
+        send_structured_test_cases_to_db(structured_test_cases_data)
+
+        # Get test case IDs for test runs and defects
+        fetched_test_cases = db.get_all_test_cases()
+        existing_test_case_ids = [tc["Test_Case_ID"] for tc in fetched_test_cases]
+
         # Generate test runs
         print("🏃 Generating test runs...")
-        generate_test_runs()
-        
+        test_run_data = generate_test_run_data(existing_test_case_ids)
+        if test_run_data:
+            send_test_run_data_to_db(test_run_data)
+
         # Generate defects
         print("🐛 Generating defects...")
-        generate_defects()
-        
+        defect_data = generate_dummy_defect_data(existing_test_case_ids)
+        if defect_data:
+            send_defect_data_to_db(defect_data)
+
         # Generate test type summaries
         print("📊 Generating test type summaries...")
-        generate_test_type_summaries()
-        
+        test_type_summary_data = generate_dummy_test_type_summary_data()
+        if test_type_summary_data:
+            send_test_type_summary_data_to_db(test_type_summary_data)
+
         # Generate transit metrics
         print("📈 Generating transit metrics...")
-        generate_transit_metrics()
+        transit_metrics_data = generate_dummy_transit_metrics_data()
+        if transit_metrics_data:
+            send_transit_metrics_data_to_db(transit_metrics_data)
         
         print("✅ All data generated successfully!")
         
