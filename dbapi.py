@@ -22,6 +22,7 @@ import base64
 
 # Import PostgreSQL database manager
 from database_postgresql import db
+from sqlalchemy import text
 
 load_dotenv()
 
@@ -942,8 +943,7 @@ def init_database():
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")
 
-# Initialize database on startup
-init_database()
+# Database initialization will be called when app starts
 
 # Database helper functions - now using PostgreSQL
 def create_user(user_data):
@@ -2532,11 +2532,22 @@ def process_transit_metrics_event(event, customer_id, source_system):
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
+    try:
+        # Test database connection
+        session = db.get_session()
+        session.execute(text("SELECT 1"))
+        session.close()
+        db_status = "healthy"
+    except Exception as e:
+        print(f"Database health check failed: {e}")
+        db_status = "unhealthy"
+    
     return jsonify({
         "status": "healthy",
         "timestamp": datetime.datetime.now().isoformat(),
         "version": "1.0.0",
-        "database": "PostgreSQL"
+        "database": "PostgreSQL",
+        "database_status": db_status
     }), 200
 
 @app.route('/api/v1/health', methods=['GET'])
@@ -2743,5 +2754,11 @@ def get_customer_test_runs(customer_id):
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
+    # Initialize database before starting the app
+    print("🚀 Starting Reporting Backend...")
+    init_database()
+    print("✅ Database initialization completed")
+    
     port = int(os.environ.get('PORT', 5000))
+    print(f"🌐 Starting server on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False)
