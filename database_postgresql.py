@@ -40,19 +40,13 @@ def get_session_local():
 class User(Base):
     __tablename__ = "users"
     
-    # Match the existing database schema
-    id = Column(String, primary_key=True)  # This will be used as username
-    email = Column(String, nullable=False)
-    name = Column(String)  # This will store first_name + last_name
-    created_at = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    # Match the existing database schema exactly
+    id = Column(String, primary_key=True)
+    email = Column(String)
+    password = Column(String)
+    name = Column(String)
+    created_at = Column(DateTime)
     last_login = Column(DateTime)
-    
-    # Additional fields we need (will be added to existing table)
-    password = Column(String, nullable=False)
-    first_name = Column(String)
-    last_name = Column(String)
-    phone = Column(String)
-    country_code = Column(String)
 
 class Requirement(Base):
     __tablename__ = "requirements"
@@ -166,16 +160,13 @@ class DatabaseManager:
             session = self.get_session()
             print("Session created successfully")
             
-            # Adapt user_data to match existing schema
+            # Simple mapping to match exact database schema
             adapted_data = {
-                'id': user_data.get('username'),  # Use username as id
+                'id': user_data.get('username'),
                 'email': user_data.get('email'),
-                'name': f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip(),
                 'password': user_data.get('password'),
-                'first_name': user_data.get('first_name'),
-                'last_name': user_data.get('last_name'),
-                'phone': user_data.get('phone'),
-                'country_code': user_data.get('country_code')
+                'name': f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip(),
+                'created_at': datetime.datetime.now()
             }
             
             print(f"Adapted data: {adapted_data}")
@@ -209,14 +200,17 @@ class DatabaseManager:
             session.close()
             
             if user:
+                # Parse name into first_name and last_name
+                name_parts = user.name.split(' ', 1) if user.name else ['', '']
+                first_name = name_parts[0] if len(name_parts) > 0 else ''
+                last_name = name_parts[1] if len(name_parts) > 1 else ''
+                
                 return {
-                    'username': user.id,  # id field is used as username
+                    'username': user.id,
                     'password': user.password,
                     'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'phone': user.phone,
-                    'country_code': user.country_code,
+                    'first_name': first_name,
+                    'last_name': last_name,
                     'created_at': user.created_at.isoformat() if user.created_at else None
                 }
             return None
@@ -233,14 +227,17 @@ class DatabaseManager:
             session.close()
             
             if user:
+                # Parse name into first_name and last_name
+                name_parts = user.name.split(' ', 1) if user.name else ['', '']
+                first_name = name_parts[0] if len(name_parts) > 0 else ''
+                last_name = name_parts[1] if len(name_parts) > 1 else ''
+                
                 return {
-                    'username': user.username,
+                    'username': user.id,
                     'password': user.password,
                     'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'phone': user.phone,
-                    'country_code': user.country_code,
+                    'first_name': first_name,
+                    'last_name': last_name,
                     'created_at': user.created_at.isoformat() if user.created_at else None
                 }
             return None
