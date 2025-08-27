@@ -4,7 +4,6 @@ flask-cors==4.0.0
 flask-swagger-ui==4.11.1
 
 # Database dependencies - Python 3.13 compatible
-# Use psycopg3 which is more compatible with Python 3.13
 psycopg[binary]==3.2.9
 sqlalchemy==2.0.41
 alembic==1.13.1
