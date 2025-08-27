@@ -41,8 +41,7 @@ swaggerui_blueprint = get_swaggerui_blueprint(
     API_URL,
     config={
         'app_name': "Reporting Application API"
-    },
-    name='api_swagger_ui'
+    }
 )
 
 docs_blueprint = get_swaggerui_blueprint(
@@ -50,12 +49,12 @@ docs_blueprint = get_swaggerui_blueprint(
     DOCS_API_URL,
     config={
         'app_name': "Reporting Application API"
-    },
-    name='docs_swagger_ui'
+    }
 )
 
-app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
-app.register_blueprint(docs_blueprint, url_prefix=DOCS_URL)
+# Register blueprints with unique names
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL, name='api_swagger')
+app.register_blueprint(docs_blueprint, url_prefix=DOCS_URL, name='docs_swagger')
 
 # Swagger JSON endpoint
 @app.route('/static/swagger.json')
