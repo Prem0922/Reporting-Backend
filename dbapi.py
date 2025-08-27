@@ -1768,7 +1768,10 @@ def signup():
     }
     
     try:
-        if create_user(user_data):
+        print(f"Attempting to create user: {username}")
+        success = create_user(user_data)
+        print(f"User creation result: {success}")
+        if success:
             return jsonify({'message': 'User created successfully'}), 201
         else:
             return jsonify({'error': 'Failed to create user'}), 500
