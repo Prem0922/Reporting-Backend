@@ -40,14 +40,19 @@ def get_session_local():
 class User(Base):
     __tablename__ = "users"
     
-    username = Column(String, primary_key=True)
-    password = Column(String, nullable=False)
+    # Match the existing database schema
+    id = Column(String, primary_key=True)  # This will be used as username
     email = Column(String, nullable=False)
+    name = Column(String)  # This will store first_name + last_name
+    created_at = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    last_login = Column(DateTime)
+    
+    # Additional fields we need (will be added to existing table)
+    password = Column(String, nullable=False)
     first_name = Column(String)
     last_name = Column(String)
     phone = Column(String)
     country_code = Column(String)
-    created_at = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
 class Requirement(Base):
     __tablename__ = "requirements"
@@ -160,7 +165,21 @@ class DatabaseManager:
             print(f"Creating user with data: {user_data}")
             session = self.get_session()
             print("Session created successfully")
-            user = User(**user_data)
+            
+            # Adapt user_data to match existing schema
+            adapted_data = {
+                'id': user_data.get('username'),  # Use username as id
+                'email': user_data.get('email'),
+                'name': f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip(),
+                'password': user_data.get('password'),
+                'first_name': user_data.get('first_name'),
+                'last_name': user_data.get('last_name'),
+                'phone': user_data.get('phone'),
+                'country_code': user_data.get('country_code')
+            }
+            
+            print(f"Adapted data: {adapted_data}")
+            user = User(**adapted_data)
             print("User object created")
             session.add(user)
             print("User added to session")
@@ -186,12 +205,12 @@ class DatabaseManager:
         """Get user by username"""
         try:
             session = self.get_session()
-            user = session.query(User).filter(User.username == username).first()
+            user = session.query(User).filter(User.id == username).first()
             session.close()
             
             if user:
                 return {
-                    'username': user.username,
+                    'username': user.id,  # id field is used as username
                     'password': user.password,
                     'email': user.email,
                     'first_name': user.first_name,
@@ -234,7 +253,7 @@ class DatabaseManager:
         """Update user password"""
         try:
             session = self.get_session()
-            user = session.query(User).filter(User.username == username).first()
+            user = session.query(User).filter(User.id == username).first()
             if user:
                 user.password = new_password
                 session.commit()
