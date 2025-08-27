@@ -984,59 +984,9 @@ def get_current_user():
     except Exception as e:
         return jsonify({'error': 'Authentication failed'}), 500
 
-@app.route('/api/requirements', methods=['GET'])
-def get_requirements():
-    """Get all requirements"""
-    try:
-        requirements = get_db().get_all_requirements()
-        return jsonify(requirements), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/testcases', methods=['GET'])
-def get_test_cases():
-    """Get all test cases"""
-    try:
-        test_cases = get_db().get_all_test_cases()
-        return jsonify(test_cases), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/testruns', methods=['GET'])
-def get_test_runs():
-    """Get all test runs"""
-    try:
-        test_runs = get_db().get_all_test_runs()
-        return jsonify(test_runs), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/defects', methods=['GET'])
-def get_defects():
-    """Get all defects"""
-    try:
-        defects = get_db().get_all_defects()
-        return jsonify(defects), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/testtypesummary', methods=['GET'])
-def get_test_type_summary():
-    """Get all test type summaries"""
-    try:
-        summaries = get_db().get_all_test_type_summary()
-        return jsonify(summaries), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/transitmetricsdaily', methods=['GET'])
-def get_transit_metrics():
-    """Get all transit metrics"""
-    try:
-        metrics = get_db().get_all_transit_metrics()
-        return jsonify(metrics), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# Dashboard endpoints are now handled by the CRUD endpoints above
+# GET /api/requirements, /api/testcases, /api/testruns, /api/defects, 
+# /api/testtypesummary, /api/transitmetricsdaily are all available
 
 if __name__ == '__main__':
     try:
