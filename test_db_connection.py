@@ -26,23 +26,8 @@ def test_imports():
         print("✅ Flask-Swagger-UI imported successfully")
         
         # Test database imports
-        try:
-            import psycopg2
-            print("✅ psycopg2 imported successfully")
-        except ImportError:
-            print("⚠️ psycopg2 not available")
-        
-        try:
-            import psycopg
-            print("✅ psycopg3 imported successfully")
-        except ImportError:
-            print("⚠️ psycopg3 not available")
-        
-        try:
-            import asyncpg
-            print("✅ asyncpg imported successfully")
-        except ImportError:
-            print("⚠️ asyncpg not available")
+        import psycopg2
+        print("✅ psycopg2 imported successfully")
         
         import sqlalchemy
         print("✅ SQLAlchemy imported successfully")
