@@ -41,7 +41,8 @@ swaggerui_blueprint = get_swaggerui_blueprint(
     API_URL,
     config={
         'app_name': "Reporting Application API"
-    }
+    },
+    name='api_swagger_ui'
 )
 
 docs_blueprint = get_swaggerui_blueprint(
@@ -49,7 +50,8 @@ docs_blueprint = get_swaggerui_blueprint(
     DOCS_API_URL,
     config={
         'app_name': "Reporting Application API"
-    }
+    },
+    name='docs_swagger_ui'
 )
 
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
