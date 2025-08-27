@@ -20,9 +20,14 @@ import datetime
 from werkzeug.utils import secure_filename
 import base64
 
-# Import PostgreSQL database manager
-from database_postgresql import db
+# Import SQLAlchemy text for queries
 from sqlalchemy import text
+
+# Lazy database import to avoid startup issues
+def get_db():
+    """Get database instance with lazy initialization"""
+    from database_postgresql import db
+    return db
 
 load_dotenv()
 
@@ -80,6 +85,16 @@ def health_check():
             "message": f"Backend error: {str(e)}",
             "timestamp": datetime.datetime.now().isoformat()
         }), 500
+
+# Basic startup test endpoint
+@app.route('/api/startup', methods=['GET'])
+def startup_test():
+    """Basic startup test - no database required"""
+    return jsonify({
+        "status": "success",
+        "message": "Flask app is running",
+        "timestamp": datetime.datetime.now().isoformat()
+    }), 200
 
 # Test database endpoint
 @app.route('/api/test-db', methods=['GET'])
@@ -1024,86 +1039,86 @@ def init_database():
 
 # Database initialization will be called when app starts
 
-# Database helper functions - now using PostgreSQL
+# Database helper functions - now using PostgreSQL with lazy initialization
 def create_user(user_data):
     """Create a new user"""
-    return db.create_user(user_data)
+    return get_db().create_user(user_data)
 
 def get_user_by_username(username):
     """Get user by username"""
-    return db.get_user_by_username(username)
+    return get_db().get_user_by_username(username)
 
 def get_user_by_email(email):
     """Get user by email"""
-    return db.get_user_by_email(email)
+    return get_db().get_user_by_email(email)
 
 def update_user_password(username, new_password):
     """Update user password"""
-    return db.update_user_password(username, new_password)
+    return get_db().update_user_password(username, new_password)
 
 def db_create_requirement(requirement_data):
     """Create a new requirement"""
-    return db.create_requirement(requirement_data)
+    return get_db().create_requirement(requirement_data)
 
 def get_all_requirements():
     """Get all requirements"""
-    return db.get_all_requirements()
+    return get_db().get_all_requirements()
 
 def db_get_requirement_by_id(requirement_id):
     """Get requirement by ID"""
-    return db.get_requirement_by_id(requirement_id)
+    return get_db().get_requirement_by_id(requirement_id)
 
 def create_test_case(test_case_data):
     """Create a new test case"""
-    return db.create_test_case(test_case_data)
+    return get_db().create_test_case(test_case_data)
 
 def get_all_test_cases():
     """Get all test cases"""
-    return db.get_all_test_cases()
+    return get_db().get_all_test_cases()
 
 def get_test_case_by_id(test_case_id):
     """Get test case by ID"""
-    return db.get_test_case_by_id(test_case_id)
+    return get_db().get_test_case_by_id(test_case_id)
 
 def get_test_cases_by_requirement(requirement_id):
     """Get test cases by requirement ID"""
-    return db.get_test_cases_by_requirement(requirement_id)
+    return get_db().get_test_cases_by_requirement(requirement_id)
 
 def get_test_cases_with_description():
     """Get test cases with requirement descriptions"""
-    return db.get_test_cases_with_description()
+    return get_db().get_test_cases_with_description()
 
 def create_test_run(test_run_data):
     """Create a new test run"""
-    return db.create_test_run(test_run_data)
+    return get_db().create_test_run(test_run_data)
 
 def get_all_test_runs():
     """Get all test runs"""
-    return db.get_all_test_runs()
+    return get_db().get_all_test_runs()
 
 def create_defect(defect_data):
     """Create a new defect"""
-    return db.create_defect(defect_data)
+    return get_db().create_defect(defect_data)
 
 def get_all_defects():
     """Get all defects"""
-    return db.get_all_defects()
+    return get_db().get_all_defects()
 
 def create_test_type_summary(summary_data):
     """Create a new test type summary"""
-    return db.create_test_type_summary(summary_data)
+    return get_db().create_test_type_summary(summary_data)
 
 def get_all_test_type_summary():
     """Get all test type summaries"""
-    return db.get_all_test_type_summary()
+    return get_db().get_all_test_type_summary()
 
 def create_transit_metric(metric_data):
     """Create a new transit metric"""
-    return db.create_transit_metric(metric_data)
+    return get_db().create_transit_metric(metric_data)
 
 def get_all_transit_metrics():
     """Get all transit metrics"""
-    return db.get_all_transit_metrics()
+    return get_db().get_all_transit_metrics()
 
 JSONBIN_API_KEY = os.getenv("JSONBIN_API_KEY")
 
@@ -2349,7 +2364,7 @@ def process_test_run_event_v2(event, customer_id, test_run_id, source_system, fi
         }
         
         # Check for duplicates (same test run, same test case)
-        existing_runs = db.get_test_runs_by_run_id(test_run_id)
+        existing_runs = get_db().get_test_runs_by_run_id(test_run_id)
         duplicate_found = any(
             run.get('test_case_id') == test_case_id
             for run in existing_runs
@@ -2363,7 +2378,7 @@ def process_test_run_event_v2(event, customer_id, test_run_id, source_system, fi
                 'message': f'Test case {test_case_id} already exists in test run {test_run_id}'
             }
         
-        if db.create_test_run(test_run_data):
+        if get_db().create_test_run(test_run_data):
             return {
                 'status': 'accepted',
                 'runId': test_run_data['run_id'],
@@ -2454,7 +2469,7 @@ def process_requirement_event(event, customer_id, source_system):
             'jira_id': event.get('jiraId', '')
         }
         
-        if db.create_requirement(requirement_data):
+        if get_db().create_requirement(requirement_data):
             return {
                 'status': 'accepted',
                 'requirementId': requirement_data['requirement_id'],
@@ -2490,7 +2505,7 @@ def process_test_case_event(event, customer_id, source_system):
             'expected_result': event.get('expectedResult', '')
         }
         
-        if db.create_test_case(test_case_data):
+        if get_db().create_test_case(test_case_data):
             return {
                 'status': 'accepted',
                 'testCaseId': test_case_data['test_case_id'],
@@ -2522,7 +2537,7 @@ def process_defect_event(event, customer_id, source_system):
             'created_at': event.get('reportedDate', datetime.datetime.now().isoformat())
         }
         
-        if db.create_defect(defect_data):
+        if get_db().create_defect(defect_data):
             return {
                 'status': 'accepted',
                 'defectId': defect_data['defect_id'],
@@ -2553,7 +2568,7 @@ def process_test_type_summary_event(event, customer_id, source_system):
             'test_date': event.get('testDate', datetime.datetime.now().isoformat())
         }
         
-        if db.create_test_type_summary(summary_data):
+        if get_db().create_test_type_summary(summary_data):
             return {
                 'status': 'accepted',
                 'testType': summary_data['test_type'],
@@ -2587,7 +2602,7 @@ def process_transit_metrics_event(event, customer_id, source_system):
             'notes': event.get('notes', '')
         }
         
-        if db.create_transit_metric(metrics_data):
+        if get_db().create_transit_metric(metrics_data):
             return {
                 'status': 'accepted',
                 'date': metrics_data['date'],
@@ -2716,7 +2731,7 @@ def get_test_results():
 def get_test_run_by_id(test_run_id):
     """Get all test cases for a specific test run"""
     try:
-        test_runs = db.get_test_runs_by_run_id(test_run_id)
+        test_runs = get_db().get_test_runs_by_run_id(test_run_id)
         
         if not test_runs:
             return jsonify({"error": f"Test run {test_run_id} not found"}), 404
@@ -2773,7 +2788,7 @@ def get_test_run_by_id(test_run_id):
 def get_customer_test_runs(customer_id):
     """Get all test runs for a customer"""
     try:
-        test_runs = db.get_test_runs_by_customer(customer_id)
+        test_runs = get_db().get_test_runs_by_customer(customer_id)
         
         # Group by test run ID
         test_run_groups = {}
@@ -2819,10 +2834,14 @@ if __name__ == '__main__':
     # Initialize database before starting the app (like CRM)
     print("🚀 Starting Reporting Backend...")
     
-    # Create database tables
-    from database_postgresql import Base, get_engine
-    Base.metadata.create_all(bind=get_engine())
-    print("✅ Database tables created successfully")
+    try:
+        # Create database tables
+        from database_postgresql import Base, get_engine
+        Base.metadata.create_all(bind=get_engine())
+        print("✅ Database tables created successfully")
+    except Exception as e:
+        print(f"⚠️  Warning: Database initialization failed: {e}")
+        print("🔄 Continuing startup - database will be initialized on first use")
     
     port = int(os.environ.get('PORT', 5000))
     print(f"🌐 Starting server on port {port}")
