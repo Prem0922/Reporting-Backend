@@ -647,6 +647,10 @@ class DatabaseManager:
             session.close()
             return []
     
+    def get_all_transit_metrics_daily(self) -> List[Dict[str, Any]]:
+        """Get all transit metrics daily (alias for get_all_transit_metrics)"""
+        return self.get_all_transit_metrics()
+    
     # Bulk operations
     def bulk_create_requirements(self, requirements: List[Dict[str, Any]]) -> int:
         """Create multiple requirements"""
