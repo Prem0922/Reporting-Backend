@@ -13,12 +13,28 @@ load_dotenv()
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/reporting_db")
 
-# Create SQLAlchemy engine (using psycopg3)
-if DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
-engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Database configuration - lazy initialization
+engine = None
+SessionLocal = None
 Base = declarative_base()
+
+def get_engine():
+    """Get database engine with lazy initialization"""
+    global engine
+    if engine is None:
+        # Create SQLAlchemy engine (using psycopg3)
+        database_url = DATABASE_URL
+        if database_url.startswith("postgresql://"):
+            database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+        engine = create_engine(database_url, pool_size=10, max_overflow=20, pool_pre_ping=True)
+    return engine
+
+def get_session_local():
+    """Get session local with lazy initialization"""
+    global SessionLocal
+    if SessionLocal is None:
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=get_engine())
+    return SessionLocal
 
 # Define SQLAlchemy models
 class User(Base):
@@ -115,18 +131,17 @@ class TransitMetric(Base):
 
 class DatabaseManager:
     def __init__(self):
-        self.engine = engine
-        self.SessionLocal = SessionLocal
         # Don't auto-initialize database - let create_db.py handle it
+        pass
     
     def get_session(self) -> Session:
         """Get a database session"""
-        return self.SessionLocal()
+        return get_session_local()()
     
     def init_database(self):
         """Initialize the database with all required tables"""
         try:
-            Base.metadata.create_all(bind=self.engine)
+            Base.metadata.create_all(bind=get_engine())
             print("✅ Database tables created successfully")
         except Exception as e:
             print(f"❌ Error creating database tables: {e}")
@@ -134,7 +149,7 @@ class DatabaseManager:
     def ensure_tables_exist(self):
         """Check if tables exist, create if they don't"""
         try:
-            Base.metadata.create_all(bind=self.engine)
+            Base.metadata.create_all(bind=get_engine())
         except Exception as e:
             print(f"❌ Error ensuring tables exist: {e}")
     
