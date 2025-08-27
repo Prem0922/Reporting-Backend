@@ -940,19 +940,25 @@ def init_database():
     try:
         print("🚀 Initializing database...")
         
-        # Import and run the initialization script
-        from init_database import init_database as init_db
-        success = init_db()
+        # Create all tables (simple approach like CRM)
+        from database_postgresql import Base, engine
+        Base.metadata.create_all(bind=engine)
         
-        if success:
-            print("✅ Database initialized successfully")
-        else:
-            print("❌ Database initialization failed")
-            
+        print("✅ Database tables created successfully")
+        
+        # List all tables
+        from sqlalchemy import inspect
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        print(f"📋 Created tables: {', '.join(tables)}")
+        
+        return True
+        
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")
         import traceback
         traceback.print_exc()
+        return False
 
 # Database initialization will be called when app starts
 
@@ -1683,7 +1689,7 @@ def signup():
         'last_name': last_name,
         'phone': phone,
         'country_code': country_code,
-        'created_at': datetime.datetime.utcnow().isoformat()
+        'created_at': datetime.datetime.now().isoformat()
     }
     
     try:
@@ -2765,10 +2771,13 @@ def get_customer_test_runs(customer_id):
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    # Initialize database before starting the app
+    # Initialize database before starting the app (like CRM)
     print("🚀 Starting Reporting Backend...")
-    init_database()
-    print("✅ Database initialization completed")
+    
+    # Create database tables
+    from database_postgresql import Base, engine
+    Base.metadata.create_all(bind=engine)
+    print("✅ Database tables created successfully")
     
     port = int(os.environ.get('PORT', 5000))
     print(f"🌐 Starting server on port {port}")
