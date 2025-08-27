@@ -938,10 +938,21 @@ def create_swagger_spec():
 def init_database():
     """Initialize the database with all required tables"""
     try:
-        db.init_database()
-        print("✅ Database initialized via SQLAlchemy")
+        print("🚀 Initializing database...")
+        
+        # Import and run the initialization script
+        from init_database import init_database as init_db
+        success = init_db()
+        
+        if success:
+            print("✅ Database initialized successfully")
+        else:
+            print("❌ Database initialization failed")
+            
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")
+        import traceback
+        traceback.print_exc()
 
 # Database initialization will be called when app starts
 
