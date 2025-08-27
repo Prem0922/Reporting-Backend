@@ -27,7 +27,7 @@ from sqlalchemy import text
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["https://reporting-frontend-bhrm.onrender.com", "http://localhost:3000", "http://localhost:3001"], supports_credentials=True)
 
 # Swagger configuration
 SWAGGER_URL = '/api/docs'
@@ -56,6 +56,28 @@ docs_blueprint = get_swaggerui_blueprint(
 # Register blueprints with unique names
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL, name='api_swagger')
 app.register_blueprint(docs_blueprint, url_prefix=DOCS_URL, name='docs_swagger')
+
+# Health check endpoint
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    try:
+        # Test database connection
+        from database_postgresql import engine
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        
+        return jsonify({
+            "status": "healthy",
+            "message": "Backend is running and database is connected",
+            "timestamp": datetime.datetime.now().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "message": f"Backend error: {str(e)}",
+            "timestamp": datetime.datetime.now().isoformat()
+        }), 500
 
 # Swagger JSON endpoint
 @app.route('/static/swagger.json')
