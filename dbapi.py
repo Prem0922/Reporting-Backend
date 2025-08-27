@@ -32,6 +32,10 @@ CORS(app)
 SWAGGER_URL = '/api/docs'
 API_URL = '/static/swagger.json'
 
+# Add /docs endpoint for easier access (like FastAPI)
+DOCS_URL = '/docs'
+DOCS_API_URL = '/static/swagger.json'
+
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
@@ -40,7 +44,16 @@ swaggerui_blueprint = get_swaggerui_blueprint(
     }
 )
 
+docs_blueprint = get_swaggerui_blueprint(
+    DOCS_URL,
+    DOCS_API_URL,
+    config={
+        'app_name': "Reporting Application API"
+    }
+)
+
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+app.register_blueprint(docs_blueprint, url_prefix=DOCS_URL)
 
 # Swagger JSON endpoint
 @app.route('/static/swagger.json')
@@ -58,6 +71,10 @@ def create_swagger_spec():
             }
         },
         "servers": [
+            {
+                "url": "https://reporting-backend-kpoz.onrender.com",
+                "description": "Production server"
+            },
             {
                 "url": "http://localhost:5000",
                 "description": "Development server"
