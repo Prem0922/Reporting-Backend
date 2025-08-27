@@ -607,6 +607,10 @@ class DatabaseManager:
             session.close()
             return []
     
+    def get_all_test_type_summaries(self) -> List[Dict[str, Any]]:
+        """Get all test type summaries (alias for get_all_test_type_summary)"""
+        return self.get_all_test_type_summary()
+    
     # Transit Metrics operations
     def create_transit_metric(self, metric_data: Dict[str, Any]) -> bool:
         """Create a new transit metric"""
