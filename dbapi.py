@@ -936,8 +936,11 @@ def create_swagger_spec():
 
 def init_database():
     """Initialize the database with all required tables"""
-    # Database initialization is now handled by SQLAlchemy in database_postgresql.py
-    print(" Database initialized via SQLAlchemy")
+    try:
+        db.init_database()
+        print("✅ Database initialized via SQLAlchemy")
+    except Exception as e:
+        print(f"❌ Database initialization failed: {e}")
 
 # Initialize database on startup
 init_database()
@@ -1672,10 +1675,14 @@ def signup():
         'created_at': datetime.datetime.utcnow().isoformat()
     }
     
-    if create_user(user_data):
-        return jsonify({'message': 'User created successfully'}), 201
-    else:
-        return jsonify({'error': 'Failed to create user'}), 500
+    try:
+        if create_user(user_data):
+            return jsonify({'message': 'User created successfully'}), 201
+        else:
+            return jsonify({'error': 'Failed to create user'}), 500
+    except Exception as e:
+        print(f"Signup error: {e}")
+        return jsonify({'error': f'Signup failed: {str(e)}'}), 500
 
 @app.route('/api/login', methods=['POST'])
 def login():
