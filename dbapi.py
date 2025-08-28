@@ -18,6 +18,9 @@ from email.mime.multipart import MIMEMultipart
 from twilio.rest import Client
 import datetime
 
+# Import SQLAlchemy
+from sqlalchemy import text
+
 # Import PostgreSQL database manager
 from database_postgresql import db
 
@@ -3632,6 +3635,224 @@ def bulk_upload_transit_metrics():
     except Exception as e:
         print(f"Error in bulk upload transit metrics: {e}")
         traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+# ============================================================================
+# ADMIN ENDPOINTS
+# ============================================================================
+
+@app.route('/admin/db-info', methods=['GET'])
+def admin_db_info():
+    """Get database information"""
+    try:
+        # Get database URL (masked for security)
+        db_url = os.environ.get('DATABASE_URL', 'Not configured')
+        if db_url != 'Not configured':
+            # Mask the password in the URL
+            if '@' in db_url:
+                parts = db_url.split('@')
+                if len(parts) == 2:
+                    user_pass = parts[0].split('://')[1]
+                    if ':' in user_pass:
+                        user, password = user_pass.split(':', 1)
+                        masked_url = db_url.replace(password, '***')
+                    else:
+                        masked_url = db_url
+                else:
+                    masked_url = db_url
+            else:
+                masked_url = db_url
+        else:
+            masked_url = db_url
+        
+        # Get table information
+        session = db.get_session()
+        tables = []
+        try:
+            # Get list of tables
+            result = session.execute(text("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public'
+                ORDER BY table_name
+            """))
+            tables = [row[0] for row in result]
+        except Exception as e:
+            print(f"Error getting tables: {e}")
+        finally:
+            session.close()
+        
+        return jsonify({
+            "database_url": masked_url,
+            "tables": tables,
+            "connection_status": "connected" if db_url != 'Not configured' else "not configured"
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/admin/db-test', methods=['GET'])
+def admin_db_test():
+    """Test database connection"""
+    try:
+        session = db.get_session()
+        # Simple test query
+        result = session.execute(text("SELECT 1 as test"))
+        test_result = result.fetchone()
+        session.close()
+        
+        if test_result and test_result[0] == 1:
+            return jsonify({
+                "status": "success",
+                "message": "Database connection successful",
+                "timestamp": datetime.datetime.now().isoformat()
+            }), 200
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "Database connection test failed",
+                "timestamp": datetime.datetime.now().isoformat()
+            }), 500
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Database connection error: {str(e)}",
+            "timestamp": datetime.datetime.now().isoformat()
+        }), 500
+
+@app.route('/admin/schema-info', methods=['GET'])
+def admin_schema_info():
+    """Get database schema information"""
+    try:
+        session = db.get_session()
+        tables = {}
+        columns = {}
+        
+        # Get table information
+        result = session.execute(text("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+            ORDER BY table_name
+        """))
+        table_list = [row[0] for row in result]
+        
+        # Get column information for each table
+        for table in table_list:
+            col_result = session.execute(text(f"""
+                SELECT column_name, data_type, is_nullable
+                FROM information_schema.columns 
+                WHERE table_schema = 'public' AND table_name = '{table}'
+                ORDER BY ordinal_position
+            """))
+            columns[table] = [{"name": row[0], "type": row[1], "nullable": row[2]} for row in col_result]
+        
+        session.close()
+        
+        return jsonify({
+            "tables": table_list,
+            "columns": columns
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/admin/generate-data', methods=['POST'])
+def admin_generate_data():
+    """Generate test data"""
+    try:
+        data = request.get_json() or {}
+        requirements_count = data.get('requirements_count', 10)
+        test_cases_count = data.get('test_cases_count', 10)
+        test_runs_count = data.get('test_runs_count', 10)
+        defects_count = data.get('defects_count', 10)
+        
+        generated = {}
+        
+        # Generate requirements
+        if requirements_count > 0:
+            from pscript import generate_dummy_requirement_data, send_requirement_data_to_db
+            requirements = []
+            for _ in range(requirements_count):
+                requirements.append(generate_dummy_requirement_data())
+            send_requirement_data_to_db(requirements)
+            generated['requirements'] = len(requirements)
+        
+        # Generate test cases
+        if test_cases_count > 0:
+            from pscript import generate_structured_test_case, send_test_case_data_to_db
+            test_cases = []
+            for _ in range(test_cases_count):
+                test_cases.append(generate_structured_test_case("FVM", "FVM", ["Test case"], []))
+            send_test_case_data_to_db(test_cases)
+            generated['test_cases'] = len(test_cases)
+        
+        # Generate test runs
+        if test_runs_count > 0:
+            from pscript import generate_test_run_data, send_test_run_data_to_db
+            test_runs = generate_test_run_data(["TC-TEST-001"])  # Use dummy test case ID
+            send_test_run_data_to_db(test_runs)
+            generated['test_runs'] = len(test_runs)
+        
+        # Generate defects
+        if defects_count > 0:
+            from pscript import generate_dummy_defect_data, send_defect_data_to_db
+            defects = generate_dummy_defect_data(["TC-TEST-001"])  # Use dummy test case ID
+            send_defect_data_to_db(defects)
+            generated['defects'] = len(defects)
+        
+        return jsonify({
+            "message": "Test data generated successfully",
+            "generated": generated
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/admin/reset-db', methods=['POST'])
+def admin_reset_db():
+    """Reset database schema"""
+    try:
+        # Drop and recreate all tables
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+        
+        return jsonify({
+            "message": "Database reset successfully",
+            "status": "completed"
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/admin/delete-db', methods=['POST'])
+def admin_delete_db():
+    """Delete all data from all tables"""
+    try:
+        session = db.get_session()
+        deleted_tables = []
+        
+        # Get all tables
+        result = session.execute(text("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+            ORDER BY table_name
+        """))
+        tables = [row[0] for row in result]
+        
+        # Delete data from each table
+        for table in tables:
+            try:
+                session.execute(text(f"DELETE FROM {table}"))
+                deleted_tables.append(table)
+            except Exception as e:
+                print(f"Error deleting from {table}: {e}")
+        
+        session.commit()
+        session.close()
+        
+        return jsonify({
+            "message": "All data deleted successfully",
+            "deleted_tables": deleted_tables
+        }), 200
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 # ============================================================================
