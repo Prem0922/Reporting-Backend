@@ -11,6 +11,20 @@ def check_schema():
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
         
+        # Check test_runs table
+        cursor.execute("""
+            SELECT column_name, data_type, is_nullable
+            FROM information_schema.columns 
+            WHERE table_name = 'test_runs'
+            ORDER BY ordinal_position;
+        """)
+        
+        print("test_runs columns:")
+        for row in cursor.fetchall():
+            print(f"  {row[0]} ({row[1]}) - nullable: {row[2]}")
+        
+        print("\n" + "="*50 + "\n")
+        
         # Check test_cases_structured table
         cursor.execute("""
             SELECT column_name, data_type 
