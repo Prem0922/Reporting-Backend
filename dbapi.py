@@ -680,6 +680,244 @@ def create_swagger_spec():
                         }
                     }
                 }
+            },
+            "/api/login": {
+                "post": {
+                    "summary": "User login",
+                    "description": "Authenticate user with username and password",
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": ["username", "password"],
+                                    "properties": {
+                                        "username": {"type": "string"},
+                                        "password": {"type": "string"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Login successful",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "token": {"type": "string"},
+                                            "user": {"type": "object"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "401": {
+                            "description": "Invalid credentials"
+                        }
+                    }
+                }
+            },
+            "/api/signup": {
+                "post": {
+                    "summary": "User signup",
+                    "description": "Create a new user account",
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": ["username", "password", "email"],
+                                    "properties": {
+                                        "username": {"type": "string"},
+                                        "password": {"type": "string"},
+                                        "email": {"type": "string"},
+                                        "first_name": {"type": "string"},
+                                        "last_name": {"type": "string"},
+                                        "phone": {"type": "string"},
+                                        "country_code": {"type": "string"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {
+                            "description": "User created successfully",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "message": {"type": "string"},
+                                            "user": {"type": "object"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {
+                            "description": "Bad request - invalid data"
+                        },
+                        "409": {
+                            "description": "User already exists"
+                        }
+                    }
+                }
+            },
+            "/admin/db-info": {
+                "get": {
+                    "summary": "Get database information",
+                    "description": "Retrieve database connection and table information",
+                    "responses": {
+                        "200": {
+                            "description": "Database information",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "database_url": {"type": "string"},
+                                            "tables": {"type": "array"},
+                                            "connection_status": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/admin/db-test": {
+                "get": {
+                    "summary": "Test database connection",
+                    "description": "Test the database connection and return status",
+                    "responses": {
+                        "200": {
+                            "description": "Database connection test result",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "status": {"type": "string"},
+                                            "message": {"type": "string"},
+                                            "timestamp": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/admin/schema-info": {
+                "get": {
+                    "summary": "Get database schema information",
+                    "description": "Retrieve detailed database schema information",
+                    "responses": {
+                        "200": {
+                            "description": "Schema information",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "tables": {"type": "array"},
+                                            "columns": {"type": "object"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/admin/generate-data": {
+                "post": {
+                    "summary": "Generate test data",
+                    "description": "Generate sample test data for all tables",
+                    "requestBody": {
+                        "required": False,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "requirements_count": {"type": "integer"},
+                                        "test_cases_count": {"type": "integer"},
+                                        "test_runs_count": {"type": "integer"},
+                                        "defects_count": {"type": "integer"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Test data generated successfully",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "message": {"type": "string"},
+                                            "generated": {"type": "object"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/admin/reset-db": {
+                "post": {
+                    "summary": "Reset database schema",
+                    "description": "Reset all database tables and recreate schema",
+                    "responses": {
+                        "200": {
+                            "description": "Database reset successfully",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "message": {"type": "string"},
+                                            "status": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/admin/delete-db": {
+                "post": {
+                    "summary": "Delete all data",
+                    "description": "Delete all data from all tables",
+                    "responses": {
+                        "200": {
+                            "description": "All data deleted successfully",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "message": {"type": "string"},
+                                            "deleted_tables": {"type": "array"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "components": {
