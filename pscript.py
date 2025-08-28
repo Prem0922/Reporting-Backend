@@ -98,74 +98,6 @@ STATUSES = ["Open", "Closed", "In-Progress", "Resolved"]
 TEST_TYPE_VALUES = ["Stress Test-Bus Readers", "Scalability Test-Backend", "Memory Usage Test - Controller", "Load Test - Gate Readers", "Battery Drain Test - Robot", "Response Time Validation - All Devices", "Performance Test - FVM", "Latency Test - NFC Tap"]
 METRICS_VALUES = ["Average Response Time", "CPU Utilization", "Recovery Time From Crash", "Transaction Completion Time", "Concurrent Sessions Handled", "Max Transactions per hour", "Battery Usage per hour", "System Up time", "Memory Usage"]
 EXPECTED_FORMATS = ["<=xxxms", "<=xxxms", "<xxxms", ">xxxms", "xx.xx%", ">=xxxx", "<=xx%", ">=xx.xx%", "<=x.xGB"]
-
-def main():
-    """Main function to generate all test data"""
-    print("🚀 Starting data generation...")
-    
-    try:
-        # Fetch existing requirement IDs before generating structured test cases
-        existing_requirement_ids = fetch_existing_requirement_ids()
-
-        # Generate and send requirements
-        print("📋 Generating requirements...")
-        num_requirements_to_generate = 10
-        for _ in range(num_requirements_to_generate):
-            requirement_data = generate_dummy_requirement_data()
-            send_requirement_data_to_db(requirement_data)
-
-        # Generate and send test cases
-        print("🧪 Generating test cases...")
-        structured_test_cases_data = []
-        
-        # Generate various test cases
-        fvm_titles = ["Verify: User should be able to purchase a SmartCard using FVM."]
-        for _ in range(3):
-            structured_test_cases_data.append(generate_structured_test_case("FVM", "FVM", fvm_titles, existing_requirement_ids))
-        
-        gate_titles = ["Verify: Gate Reader should be able to read DesFire, MiFare, Credit card and Barcode."]
-        for _ in range(3):
-            structured_test_cases_data.append(generate_structured_test_case("GATE READER", "GATE", gate_titles, existing_requirement_ids))
-        
-        send_structured_test_cases_to_db(structured_test_cases_data)
-
-        # Get test case IDs for test runs and defects
-        fetched_test_cases = db.get_all_test_cases()
-        existing_test_case_ids = [tc["Test_Case_ID"] for tc in fetched_test_cases]
-
-        # Generate test runs
-        print("🏃 Generating test runs...")
-        test_run_data = generate_test_run_data(existing_test_case_ids)
-        if test_run_data:
-            send_test_run_data_to_db(test_run_data)
-
-        # Generate defects
-        print("🐛 Generating defects...")
-        defect_data = generate_dummy_defect_data(existing_test_case_ids)
-        if defect_data:
-            send_defect_data_to_db(defect_data)
-
-        # Generate test type summaries
-        print("📊 Generating test type summaries...")
-        test_type_summary_data = generate_dummy_test_type_summary_data()
-        if test_type_summary_data:
-            send_test_type_summary_data_to_db(test_type_summary_data)
-
-        # Generate transit metrics
-        print("📈 Generating transit metrics...")
-        transit_metrics_data = generate_dummy_transit_metrics_data()
-        if transit_metrics_data:
-            send_transit_metrics_data_to_db(transit_metrics_data)
-        
-        print("✅ All data generated successfully!")
-        
-    except Exception as e:
-        print(f"❌ Error generating data: {e}")
-        import traceback
-        traceback.print_exc()
-
-if __name__ == "__main__":
-    main()
 ACTUAL_FORMATS_MS = ["xxxms", "xxms"]
 ACTUAL_FORMATS_PERCENT = ["xx.xx%"]
 ACTUAL_FORMATS_SECONDS = ["x.xs"]
@@ -322,6 +254,9 @@ def generate_test_run_data(test_case_ids):
         random_test_case_id = random.choice(test_case_ids)
         # Use UUID instead of hardcoded rid-xxx format to avoid duplicates
         run_id = str(uuid.uuid4())
+        test_run_id = f"TR-{datetime.now().strftime('%Y%m%d')}-{random.randint(1000, 9999)}"
+        customer_id = random.randint(1, 1000)
+        source_system = random.choice(["FVM", "Gate_Reader", "Bus_Reader", "Backend"])
         execution_date = datetime.now().strftime('%d-%m-%Y %H:%M')
         result = random.choice(TEST_RESULTS)
         observed_time = random.randint(100, 9999)
@@ -330,6 +265,9 @@ def generate_test_run_data(test_case_ids):
 
         test_runs.append({
             "run_id": run_id,
+            "test_run_id": test_run_id,
+            "customer_id": customer_id,
+            "source_system": source_system,
             "test_case_id": random_test_case_id,
             "execution_date": execution_date,
             "result": result,
