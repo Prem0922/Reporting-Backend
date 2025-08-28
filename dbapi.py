@@ -3466,4 +3466,10 @@ def health_check_v1():
     }), 200
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    # Get port from environment variable (Render sets PORT)
+    port = int(os.environ.get('PORT', 5000))
+    # Use 0.0.0.0 for production (Render), 127.0.0.1 for development
+    host = '0.0.0.0' if os.environ.get('FLASK_ENV') == 'production' else '127.0.0.1'
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    
+    app.run(host=host, port=port, debug=debug)
